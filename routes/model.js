@@ -5,21 +5,13 @@ var cheerio = require('cheerio');
 
 router.get('/public', function (req, res, next) {
   request('http://wordsareevil.wix.com/eunhaseoul', function (error, response, body) {
-    var result = 'var publicModel = ';
     if (!error && response.statusCode == 200) {
-      var $ = cheerio.load(body);
-      $('script').each(function (index, element) {
-        if (element.children[0]) {
-          var script = eval(element.children[0].data);
-          if(typeof publicModel !== 'undefined') {
-            publicModel.domain = 'eunhaseoul.com';
-            publicModel.externalBaseUrl = 'http://eunhaseoul.com';
-            result += JSON.stringify(publicModel);
-          }
-        }
-      });
+      var matches = body.match(/var publicModel = (.*);/im);
+      var publicModel = JSON.parse(matches[1]);
+      publicModel.domain = 'eunhaseoul.com';
+      publicModel.externalBaseUrl = 'http://eunhaseoul.com';
       res.setHeader('Content-Type', 'text/javascript');
-      res.send(result);
+      res.send('var publicModel =' + JSON.stringify(publicModel));
     }
   });
 });
